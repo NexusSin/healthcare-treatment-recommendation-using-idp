@@ -1,0 +1,64 @@
+Warning: Verifying and/or autocompleting structure S
+Warning: Consistency cannot be checked for functions over an infinite domain.
+% Specialising partially instantiated calls to xsb_configuration/2
+Waiting for compilation of file (/export/home1/home/idpinstall/idp-installs/3.7.1-spass/bin/xsb-3.7.0/config/x86_64-unknown-linux-gnu/lib/xsb_configuration.xsblock)
+Number of models: 2
+Model 1
+=======
+structure  : V {
+  Disease = { "asthma"; "flu"; "hypertension"; "pneumonia" }
+  Patient = { "alice"; "bob"; "charlie"; "diana" }
+  Symptom = { "cough"; "dyspnea"; "fever"; "headache" }
+  Treatment = { "amlodipine"; "antibiotics"; "bronchodilator"; "ibuprofen"; "paracetamol" }
+  Allergic = { "alice","antibiotics"; "charlie","ibuprofen" }
+  Contraindicated = { "alice","antibiotics"; "charlie","ibuprofen" }
+  Eligible = { "alice","ibuprofen"; "alice","paracetamol"; "bob","antibiotics"; "bob","bronchodilator"; "charlie","bronchodilator"; "diana","amlodipine"; "diana","ibuprofen"; "diana","paracetamol" }
+  HasDisease = { "alice","flu"; "bob","pneumonia"; "charlie","asthma"; "diana","flu"; "diana","hypertension" }
+  HasSymptom = { "alice","fever"; "alice","headache"; "bob","cough"; "bob","dyspnea"; "charlie","dyspnea"; "diana","fever"; "diana","headache" }
+  HighRisk = { "diana" }
+  Incompatible = { "ibuprofen","paracetamol"; "paracetamol","ibuprofen" }
+  Recommended = { "alice","paracetamol"; "bob","bronchodilator"; "charlie","bronchodilator"; "diana","amlodipine"; "diana","paracetamol" }
+  Treats = { "amlodipine","hypertension"; "antibiotics","pneumonia"; "bronchodilator","asthma"; "bronchodilator","pneumonia"; "ibuprofen","flu"; "paracetamol","flu" }
+  TreatsSymptom = { "amlodipine","headache"; "antibiotics","cough"; "antibiotics","dyspnea"; "bronchodilator","dyspnea"; "ibuprofen","fever"; "paracetamol","fever"; "paracetamol","headache" }
+  Age = { "alice"->35; "bob"->72; "charlie"->28; "diana"->80 }
+  MaxTreatments = 3
+  amlodipine = "amlodipine"
+  antibiotics = "antibiotics"
+  asthma = "asthma"
+  bronchodilator = "bronchodilator"
+  flu = "flu"
+  hypertension = "hypertension"
+  ibuprofen = "ibuprofen"
+  paracetamol = "paracetamol"
+  pneumonia = "pneumonia"
+}
+
+Model 2
+=======
+structure  : V {
+  Disease = { "asthma"; "flu"; "hypertension"; "pneumonia" }
+  Patient = { "alice"; "bob"; "charlie"; "diana" }
+  Symptom = { "cough"; "dyspnea"; "fever"; "headache" }
+  Treatment = { "amlodipine"; "antibiotics"; "bronchodilator"; "ibuprofen"; "paracetamol" }
+  Allergic = { "alice","antibiotics"; "charlie","ibuprofen" }
+  Contraindicated = { "alice","antibiotics"; "charlie","ibuprofen" }
+  Eligible = { "alice","ibuprofen"; "alice","paracetamol"; "bob","antibiotics"; "bob","bronchodilator"; "charlie","bronchodilator"; "diana","amlodipine"; "diana","ibuprofen"; "diana","paracetamol" }
+  HasDisease = { "alice","flu"; "bob","pneumonia"; "charlie","asthma"; "diana","flu"; "diana","hypertension" }
+  HasSymptom = { "alice","fever"; "alice","headache"; "bob","cough"; "bob","dyspnea"; "charlie","dyspnea"; "diana","fever"; "diana","headache" }
+  HighRisk = { "diana" }
+  Incompatible = { "ibuprofen","paracetamol"; "paracetamol","ibuprofen" }
+  Recommended = { "alice","ibuprofen"; "bob","bronchodilator"; "charlie","bronchodilator"; "diana","amlodipine"; "diana","paracetamol" }
+  Treats = { "amlodipine","hypertension"; "antibiotics","pneumonia"; "bronchodilator","asthma"; "bronchodilator","pneumonia"; "ibuprofen","flu"; "paracetamol","flu" }
+  TreatsSymptom = { "amlodipine","headache"; "antibiotics","cough"; "antibiotics","dyspnea"; "bronchodilator","dyspnea"; "ibuprofen","fever"; "paracetamol","fever"; "paracetamol","headache" }
+  Age = { "alice"->35; "bob"->72; "charlie"->28; "diana"->80 }
+  MaxTreatments = 3
+  amlodipine = "amlodipine"
+  antibiotics = "antibiotics"
+  asthma = "asthma"
+  bronchodilator = "bronchodilator"
+  flu = "flu"
+  hypertension = "hypertension"
+  ibuprofen = "ibuprofen"
+  paracetamol = "paracetamol"
+  pneumonia = "pneumonia"
+}

@@ -1,0 +1,223 @@
+// ============================================================================
+// HEALTHCARE TREATMENT RECOMMENDATION - IDP Model
+// FINAL VERSION
+// ============================================================================
+
+vocabulary V {
+    // Types
+    type Patient
+    type Disease
+    type Symptom
+    type Treatment
+
+    // Constants:
+    flu: Disease
+    pneumonia: Disease
+    asthma: Disease
+    hypertension: Disease
+    
+    paracetamol: Treatment
+    antibiotics: Treatment
+    bronchodilator: Treatment
+    amlodipine: Treatment
+    ibuprofen: Treatment
+
+    // Predicates: Domain facts
+    HasDisease(Patient, Disease)
+    HasSymptom(Patient, Symptom)
+    Allergic(Patient, Treatment)
+    
+    // Treatment properties
+    Treats(Treatment, Disease)
+    TreatsSymptom(Treatment, Symptom)
+    Incompatible(Treatment, Treatment)
+    
+    // Patient properties
+    HighRisk(Patient)
+    Age(Patient): int
+    
+    // Decision predicates
+    Eligible(Patient, Treatment)
+    Contraindicated(Patient, Treatment)
+    Recommended(Patient, Treatment)
+    
+    // Constants
+    MaxTreatments: int
+}
+
+structure S : V {
+    // Define domain objects
+    Patient = {alice; bob; charlie; diana}
+    
+    // Define domains
+    Disease = {flu; pneumonia; asthma; hypertension}
+    Symptom = {fever; cough; dyspnea; headache}
+    Treatment = {paracetamol; antibiotics; bronchodilator; amlodipine; ibuprofen}
+    
+    // Map constants to domain elements
+    flu = flu
+    pneumonia = pneumonia
+    asthma = asthma
+    hypertension = hypertension
+    
+    paracetamol = paracetamol
+    antibiotics = antibiotics
+    bronchodilator = bronchodilator
+    amlodipine = amlodipine
+    ibuprofen = ibuprofen
+    
+    // Domain facts: which patients have which diseases
+    HasDisease = {
+        (alice, flu);
+        (bob, pneumonia);
+        (charlie, asthma);
+        (diana, hypertension);
+        (diana, flu)
+    }
+    
+    // Domain facts: which patients have which symptoms
+    HasSymptom = {
+        (alice, fever);
+        (alice, headache);
+        (bob, cough);
+        (bob, dyspnea);
+        (charlie, dyspnea);
+        (diana, fever);
+        (diana, headache) 
+    }
+    
+    // Allergies
+    Allergic = {
+        (alice, antibiotics);
+        (charlie, ibuprofen)
+    }
+    
+    // Treatment-disease mapping
+    Treats = {
+        (paracetamol, flu);
+        (antibiotics, pneumonia);
+        (bronchodilator, asthma);
+        (amlodipine, hypertension);
+        (ibuprofen, flu);
+        (bronchodilator, pneumonia) 
+    }
+    
+    // Treatment-symptom mapping
+    TreatsSymptom = {
+        (paracetamol, fever);
+        (paracetamol, headache);
+        (antibiotics, cough);
+        (antibiotics, dyspnea);
+        (bronchodilator, dyspnea);
+        (ibuprofen, fever);
+        (amlodipine, headache)
+    }
+    
+    // Drug incompatibilities
+    Incompatible = {
+        (ibuprofen, paracetamol);
+        (paracetamol, ibuprofen)
+    }
+    
+    // Risk classification
+    HighRisk = {diana}
+    
+    // Patient ages
+    Age = {
+        alice -> 35;
+        bob -> 72;
+        charlie -> 28;
+        diana -> 80
+    }
+    
+    // Constants
+    MaxTreatments = 3
+}
+
+theory T : V {
+    
+    // ========== DEFINITIONS ==========
+    {
+        // Eligible: Treats a disease the patient has AND not allergic
+        !p[Patient], t[Treatment]:
+            Eligible(p, t) <- 
+                (?d[Disease]: HasDisease(p, d) & Treats(t, d)) &
+                ~Allergic(p, t).
+        
+        // Contraindicated: Allergic OR Defined by Cross-Allergy (C18)
+        !p[Patient], t[Treatment]:
+            Contraindicated(p, t) <- 
+                Allergic(p, t) | 
+                (t = ibuprofen & Allergic(p, paracetamol)).
+    }
+
+    // ========== CONSTRAINTS ==========
+    
+    // C3: No incompatible pairs
+    !p[Patient], t1[Treatment], t2[Treatment]:
+        Recommended(p, t1) & Incompatible(t1, t2) => 
+        ~Recommended(p, t2).
+    
+    // C4: Treat all diseases
+    !p[Patient], d[Disease]:
+        HasDisease(p, d) =>
+        ?t[Treatment]:
+            Treats(t, d) & Recommended(p, t).
+    
+    // C5: Only eligible treatments
+    !p[Patient], t[Treatment]:
+        Recommended(p, t) => Eligible(p, t).
+
+    // C19: Never recommend contraindicated (Safety)
+    !p[Patient], t[Treatment]:
+        Recommended(p, t) => ~Contraindicated(p, t).
+    
+    // C6: Limit concurrent treatments
+    !p[Patient]:
+        #{t[Treatment] : Recommended(p, t)} =< MaxTreatments.
+    
+    // C7: High-risk treatment requirement
+    !p[Patient]:
+        HighRisk(p) =>
+        (!t[Treatment]: Recommended(p, t) => ?s[Symptom]: HasSymptom(p, s) & TreatsSymptom(t, s)).
+    
+    // C8: Elderly avoid NSAIDs
+    !p[Patient]:
+        Age(p) > 75 => ~Recommended(p, ibuprofen).
+    
+    // C9: Single treatment per disease
+    !p[Patient], d[Disease], t1[Treatment], t2[Treatment]:
+        HasDisease(p, d) & Treats(t1, d) & Treats(t2, d) & 
+        Recommended(p, t1) & Recommended(p, t2) =>
+        t1 = t2.
+    
+    // C11: Flu + Pneumonia => Antibiotics
+    !p[Patient]:
+        HasDisease(p, flu) & HasDisease(p, pneumonia) =>
+        Recommended(p, antibiotics).
+    
+    // C12: Respiratory priority
+    !p[Patient]:
+        (HasDisease(p, asthma) | HasDisease(p, pneumonia)) =>
+        Recommended(p, bronchodilator).
+    
+    // C13: Hypertension control
+    !p[Patient]:
+        HasDisease(p, hypertension) =>
+        Recommended(p, amlodipine).
+    
+    // C14: Selective antibiotic use
+    !p[Patient]:
+        ~HighRisk(p) & ~HasDisease(p, pneumonia) =>
+        ~Recommended(p, antibiotics).
+        
+    // C16: Elderly medication limits
+    !p[Patient]:
+        Age(p) > 70 =>
+        #{t[Treatment] : Recommended(p, t)} =< 2.
+}
+
+procedure main() {
+    models = allmodels(T, S)
+    printmodels(models)
+}
